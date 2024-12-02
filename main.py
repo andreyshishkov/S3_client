@@ -1,6 +1,12 @@
+import asyncio
 import os
 from contextlib import asynccontextmanager
+from enum import verify
+
 from aiobotocore.session import get_session
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class S3Client:
@@ -20,7 +26,7 @@ class S3Client:
 
     @asynccontextmanager
     async def get_client(self):
-        async with self.session.create_client('s3', **self.config) as client:
+        async with self.session.create_client('s3', **self.config, verify=False) as client:
             yield client
 
     async def upload_file(self,
@@ -34,3 +40,20 @@ class S3Client:
                     Key=object_name,
                     Body=file,
                 )
+
+
+async def main():
+    endpoint_url = 'https://s3.storage.selcloud.ru'
+    bucket_name = 'test-public-bucket1'
+    s3_client = S3Client(
+        access_key=os.environ['ACCESS_KEY'],
+        secret_key=os.environ['SECRET_KEY'],
+        endpoint_url=endpoint_url,
+        bucket_name=bucket_name,
+    )
+
+    await s3_client.upload_file('rabbitmq.png')
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
