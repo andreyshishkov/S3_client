@@ -31,5 +31,6 @@ class S3Client:
             with open(file_path, 'rb') as file:
                 await client.put_object(
                     Bucket=self.bucket_name,
+                    Key=object_name,
                     Body=file,
                 )
